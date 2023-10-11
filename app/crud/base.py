@@ -1,13 +1,12 @@
-from typing import List
-from typing import Optional
+from typing import List, Optional, Union
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.user import User
 from app.models.charity_project import CharityProject
 from app.models.donation import Donation
+from app.models.user import User
 
 
 class CRUDBase:
@@ -99,3 +98,38 @@ class CRUDBase:
             )
         )
         return charity_project.scalars().first()
+    
+    @staticmethod
+    async def get_not_invested_objects(
+        type_obj: Union[CharityProject, Donation],
+        session: AsyncSession
+    ) -> List[Union[CharityProject, Donation]]:
+        model = (
+            CharityProject if isinstance(type_obj, Donation) else Donation
+        )
+        db_objects = await session.execute(
+            select(
+                model
+            ).where(
+                model.fully_invested == false()
+            ).order_by(
+                model.create_date
+            )
+        )
+        return db_objects.scalars().all()
+    
+    @staticmethod
+    async def get_projects_by_completion_rate(
+            session: AsyncSession,
+    ) -> List[CharityProject]:
+        charity_projects = await session.execute(
+            select(CharityProject).where(
+                CharityProject.fully_invested
+            ).order_by(
+                func.julianday(CharityProject.close_date) -
+                func.julianday(CharityProject.create_date)
+            )
+        )
+        return charity_projects.scalars().all()
+    
+charity_project_crud = CRUDBase(CharityProject)

@@ -10,7 +10,7 @@ from app.schemas.charity_project import (
     CharityProjectCreate,
     CharityProjectUpdate
 )
-from app.crud.charity_project import charity_project_crud
+from app.crud.base import charity_project_crud
 from app.api.endpoints.validator import (
     check_name_duplicate,
     check_charity_project_exists,
