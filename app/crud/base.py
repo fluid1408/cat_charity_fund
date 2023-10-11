@@ -3,6 +3,7 @@ from typing import List, Optional, Union
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql.expression import false
 
 from app.models.charity_project import CharityProject
 from app.models.donation import Donation
@@ -98,7 +99,7 @@ class CRUDBase:
             )
         )
         return charity_project.scalars().first()
-    
+
     @staticmethod
     async def get_not_invested_objects(
         type_obj: Union[CharityProject, Donation],
@@ -117,7 +118,7 @@ class CRUDBase:
             )
         )
         return db_objects.scalars().all()
-    
+
     @staticmethod
     async def get_projects_by_completion_rate(
             session: AsyncSession,
@@ -131,5 +132,6 @@ class CRUDBase:
             )
         )
         return charity_projects.scalars().all()
-    
+
+
 charity_project_crud = CRUDBase(CharityProject)
